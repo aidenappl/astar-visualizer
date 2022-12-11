@@ -1,5 +1,5 @@
-import '../styles/globals.css';
-import PageHead from '../components/PageHead';
+import "../styles/globals.css";
+import PageHead from "../components/PageHead";
 
 function AstarVisualizer({ Component, pageProps }: any) {
 	return (

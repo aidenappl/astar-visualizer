@@ -1,0 +1,19 @@
+Project Report: 
+
+In this course, we have learned many mathematical concepts related to computer science, such as number representation on computers, counting,
+and data relationships. Counting has allowed us to understand data sets and how there is passcode security. The relationships of data structure have 
+allowed us to understand real-world problems like finding the shortest distance between two points. The course has allowed us to understand data 
+representation, logical operations, and the use of data structures and algorithms to manipulate software. We have also identified when a counting
+problem should implement data structures, algorithms, or logical operations to various counting problems.
+
+In our project, we have looked more in detail at how we can use relationships of data to find the quickest way to get from one point to another. 
+Our AStar Path finder algorithm code will be using a connection of nodes and depending on the score of the collection of nodes with its path. 
+The score of a node will be defined by the number of nodes connected to it and how far it is from the designated ending node given by the user. 
+
+Through this project, we have learned more about the connection of structures such as nodes. In addition, we have discovered and developed more vital 
+webpage programming skills and the use of NextJS. We researched not only the new programming language's syntax but also the algorithm and the way the 
+code runs to find the quickest path. We also researched different types of AStar pathfinders to gain ideas on ways to make our own interactive AStar Path 
+Finder. The user will enter the website, set a start and end point, and draw obstacles throughout the grid. If the user wants to erase parts of the 
+barriers, then they will be able to by pressing the shift key and selecting which parts of the grid they would like to erase. Once the barriers are set, 
+and the user wants to start and see the algorithm find its path, they will run it and watch the program find and trace out the quickest route from the 
+start to the end. 

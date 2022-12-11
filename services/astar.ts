@@ -21,44 +21,47 @@ function Astar(arena:Node[], start:Node, end:Node): Node[]|null {
 
         let currentNode:Node = possibleCurNode;
 
-        //add the current node to the closed set
-        closedSet.push(currentNode);
+        //check if the current node has null evaluation
+        if (currentNode.f!=null&&currentNode.g!=null&&currentNode.h!=null) {
+            //add the current node to the closed set
+            closedSet.push(currentNode);
 
-        //check if the current node is the end
-        if (end.position === currentNode?.position) {
-            return getPath(currentNode);
-        }
+            //check if the current node is the end
+            if (end.position === currentNode?.position) {
+                return getPath(currentNode);
+            }
 
-        //get the children of the current node
-        let potential_children:Node[] = getChildren(currentNode,arena);
+            //get the children of the current node
+            let potential_children:Node[] = getChildren(currentNode,arena);
 
-        //for each of the children
-        potential_children.forEach(child => {
-            //if child is not in the closed set
-            if (closedSet.find(node => postitionsAreEqual(node.position, child.position)) === undefined) {
-                //define the new evaluation values
-                var g:number = currentNode.g+1;
-                var h:number = distance(currentNode, end);
-                var f:number = g + h;
-                var child_to_add:Node = newNode(getNewID(), child.position, "evaluated", currentNode, g, h, f);
-                //if the child's position is in the open set, we need to account for if there is a better option in the open set
-                if (openSet.find(node => postitionsAreEqual(node.position, child.position)) !== undefined) {
-                    //if the best g value node with the same pos as the child in the open set has a worse g value 
-                    if (getBestGNodeWithPos(child_to_add, openSet).g>child_to_add.g) {
-                        //remove all the nodes with the same position as the child
-                        openSet.filter(node => postitionsAreEqual(node.position, child_to_add.position));
-                        //add the new child to the list
+            //for each of the children
+            potential_children.forEach(child => {
+                //if child is not in the closed set
+                if (closedSet.find(node => postitionsAreEqual(node.position, child.position)) === undefined) {
+                    //define the new evaluation values
+                    var g:number = currentNode.g!+1;
+                    var h:number = distance(currentNode, end);
+                    var f:number = g + h;
+                    var child_to_add:Node = newNode(getNewID(), child.position, "evaluated", currentNode, g, h, f);
+                    //if the child's position is in the open set, we need to account for if there is a better option in the open set
+                    if (openSet.find(node => postitionsAreEqual(node.position, child.position)) !== undefined) {
+                        //if the best g value node with the same pos as the child in the open set has a worse g value 
+                        if (getBestGNodeWithPos(child_to_add, openSet).g!>child_to_add.g!) {
+                            //remove all the nodes with the same position as the child
+                            openSet.filter(node => postitionsAreEqual(node.position, child_to_add.position));
+                            //add the new child to the list
+                            openSet.push(child_to_add);
+                        }
+                        //dont add it if not
+                    } 
+                    // if the child's position is not in the open set
+                    else {
+                        //add the child to the open set
                         openSet.push(child_to_add);
                     }
-                    //dont add it if not
-                } 
-                // if the child's position is not in the open set
-                else {
-                    //add the child to the open set
-                    openSet.push(child_to_add);
                 }
-            }
-        });
+            });
+        }
     }
     return null;
 }

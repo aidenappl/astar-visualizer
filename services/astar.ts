@@ -1,6 +1,6 @@
 import {Node, Position, newNode, newPosition} from "../types/node.type";
 
-function Astar(arena:Node[], start:Node, end:Node): Node[]|null {
+export function Astar(arena:Node[], start:Node, end:Node): Node[]|null {
     //define open set and closed set
     let openSet:Node[] = [];
     let closedSet:Node[] = [];
@@ -42,6 +42,7 @@ function Astar(arena:Node[], start:Node, end:Node): Node[]|null {
                     var g:number = currentNode.g!+1;
                     var h:number = distance(currentNode, end);
                     var f:number = g + h;
+                    //define a new child that is to be added to the open set (potentially)
                     var child_to_add:Node = newNode(getNewID(), child.position, "evaluated", currentNode, g, h, f);
                     //if the child's position is in the open set, we need to account for if there is a better option in the open set
                     if (openSet.find(node => postitionsAreEqual(node.position, child.position)) !== undefined) {

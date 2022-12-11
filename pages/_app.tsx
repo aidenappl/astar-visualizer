@@ -1,8 +1,7 @@
 import '../styles/globals.css';
-import type { AppProps } from 'next/app';
 import PageHead from '../components/PageHead';
 
-function MyApp({ Component, pageProps }: any) {
+function AstarVisualizer({ Component, pageProps }: any) {
 	return (
 		<>
 			<PageHead title={pageProps.title} />
@@ -11,4 +10,4 @@ function MyApp({ Component, pageProps }: any) {
 	);
 }
 
-export default MyApp;
+export default AstarVisualizer;

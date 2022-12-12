@@ -1,12 +1,13 @@
+import { range } from "lodash";
 import { useEffect, useState } from "react";
 import Button from "../components/Button";
 import Layout from "../components/Layout";
 import { Astar } from "../services/astar";
-import { newNode, Node } from "../types/node.type";
+import { EmptyNode, newNode, Node } from "../types/node.type";
 
 const InteractivePage = () => {
 	// Node State
-	const [nodes, setNodes] = useState<Node[]>([]);
+	const [nodes, setNodes] = useState<Node[][]>([]);
 
 	// Mouse Event Handler
 	const [clickState, setClickState] = useState<string | null>(null);
@@ -20,10 +21,10 @@ const InteractivePage = () => {
 		if (event.buttons == 1) {
 			if (event.shiftKey) {
 				// Erase
-				clearNode(parseInt(node.split("_")[1]));
+				clearNode(nodes[node.split("x")[0]][node.split("x")[1]]);
 			} else {
 				// Draw
-				selectedNode(parseInt(node.split("_")[1]));
+				selectNode(nodes[node.split("x")[0]][node.split("x")[1]]);
 			}
 		}
 	};
@@ -34,21 +35,24 @@ const InteractivePage = () => {
 			setStartPoint(node);
 			setNodes((prevState) => {
 				let newState = [...prevState];
-				newState[node.id].type = "startpoint";
+				newState[node.x][node.y].type = "startpoint";
 				return newState;
 			});
 		} else if (pointType == "endpoint" && endPoint == null) {
 			setEndPoint(node);
 			setNodes((prevState) => {
 				let newState = [...prevState];
-				newState[node.id].type = "endpoint";
+				newState[node.x][node.y].type = "endpoint";
 				return newState;
 			});
 		}
 	};
 
 	useEffect(() => {
-		setNodes(generateNodes(700, 700));
+		setNodes(generateNodes(25, 25, EmptyNode));
+	}, []);
+
+	useEffect(() => {
 		document
 			.getElementById("interactivezone")!
 			.addEventListener("mousemove", handleMouseMove);
@@ -58,47 +62,32 @@ const InteractivePage = () => {
 				.getElementById("interactivezone")!
 				.removeEventListener("mousemove", handleMouseMove);
 		};
-	}, []);
+	}, [nodes]);
 
-	const selectedNode = (node: number) => {
+	const selectNode = (node: Node) => {
 		setNodes((prevState) => {
 			let newState = [...prevState];
-			newState[node].type = "obstacle";
+			newState[node.x][node.y].type = "obstacle";
 			return newState;
 		});
 	};
 
-	const clearNode = (node: number) => {
+	const clearNode = (node: Node) => {
 		setNodes((prevState) => {
 			let newState = [...prevState];
-			newState[node].type = "unselected";
+			newState[node.x][node.y].type = "unselected";
 			return newState;
 		});
 	};
 
-	const generateNodes = (width: number, height: number): Node[] => {
-		let genNodes: any[] = [];
-		let id = 0;
-		for (let i = 0; i < width; i += 28) {
-			for (let j = 0; j < height; j += 28) {
-				genNodes.push(
-					newNode(
-						id,
-						{
-							x: i / 28,
-							y: j / 28,
-						},
-						"unselected",
-						null,
-						0,
-						0,
-						0
-					)
-				);
-				id++;
-			}
-		}
-		return genNodes;
+	const generateNodes = <Node extends { x: number; y: number }>(
+		width: number,
+		height: number,
+		value: Node
+	): Node[][] => {
+		return range(width).map((x) =>
+			range(height).map((y) => ({ ...value, x, y }))
+		);
 	};
 
 	return (
@@ -112,7 +101,7 @@ const InteractivePage = () => {
 							setClickState(null);
 							setStartPoint(null);
 							setEndPoint(null);
-							setNodes(generateNodes(700, 700));
+							setNodes(generateNodes(25, 25, EmptyNode));
 						}}
 						value="Clear"
 					/>
@@ -122,9 +111,9 @@ const InteractivePage = () => {
 								window.alert("Please set start and end point");
 								return;
 							}
-							console.log(
-								await Astar(nodes, startPoint!, endPoint!)
-							);
+							// console.log(
+							// 	await Astar(nodes, startPoint!, endPoint!)
+							// );
 						}}
 						value="Solve"
 					/>
@@ -156,33 +145,58 @@ const InteractivePage = () => {
 						id="interactivezone"
 						className="flex flex-wrap w-[700px] "
 					>
-						{nodes.map((node, i) => {
-							return (
-								<div
-									key={i}
-									onClick={() => {
-										if (clickState == "startpoint") {
-											setMasterPoint(node, "startpoint");
-										} else if (clickState == "endpoint") {
-											setMasterPoint(node, "endpoint");
-										} else {
-											selectedNode(node.id);
-										}
-									}}
-									id={`node_${node.id}`}
-									className={
-										"w-[28px] h-[28px] bg-gray-200 border border-gray-300 hover:bg-gray-800 " +
-										(node.type === "obstacle"
-											? "bg-gray-500" // Selected
-											: node.type === "startpoint"
-											? "bg-green-500" // Start
-											: node.type === "endpoint"
-											? "bg-red-500" // End
-											: "")
-									}
-								/>
-							);
-						})}
+						{nodes
+							? nodes.map((row, rowIndex) => {
+									return (
+										<div key={rowIndex}>
+											{row.map((node, i) => {
+												return (
+													<div
+														key={i}
+														onClick={() => {
+															if (
+																clickState ==
+																"startpoint"
+															) {
+																setMasterPoint(
+																	node,
+																	"startpoint"
+																);
+															} else if (
+																clickState ==
+																"endpoint"
+															) {
+																setMasterPoint(
+																	node,
+																	"endpoint"
+																);
+															} else {
+																selectNode(
+																	node
+																);
+															}
+														}}
+														id={`${node.x}x${node.y}`}
+														className={
+															"w-[28px] h-[28px] bg-gray-200 border border-gray-300 hover:bg-gray-800 " +
+															(node.type ===
+															"obstacle"
+																? "bg-gray-500" // Selected
+																: node.type ===
+																  "startpoint"
+																? "bg-green-500" // Start
+																: node.type ===
+																  "endpoint"
+																? "bg-red-500" // End
+																: "")
+														}
+													/>
+												);
+											})}
+										</div>
+									);
+							  })
+							: null}
 					</div>
 				</div>
 			</div>
@@ -191,5 +205,3 @@ const InteractivePage = () => {
 };
 
 export default InteractivePage;
-
-

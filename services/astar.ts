@@ -4,7 +4,7 @@ const Astar = async (
 	arena: Node[],
 	start: Node,
 	end: Node
-): Promise<Node[] | null>  => {
+): Promise<Node[] | null> => {
 	console.log("Astar called", arena, start, end);
 
 	//define open set and closed set
@@ -13,7 +13,9 @@ const Astar = async (
 
 	//add the starting node to the open set
 	openSet.push(start);
-    openSet.push(newNode (getNewID(), newPosition(50, 50), "unselected", null, 0, 0, 0))
+	openSet.push(
+		newNode(getNewID(), newPosition(50, 50), "unselected", null, 0, 0, 0)
+	);
 
 	//while open set is not empty
 	while (openSet.length > 0) {
@@ -28,7 +30,7 @@ const Astar = async (
 
 		openSet = openSet.filter((node) => node.f !== lowestFVal);
 
-        console.log(lowestFVal, possibleCurNode, openSet)
+		console.log(lowestFVal, possibleCurNode, openSet);
 
 		//if the current node is undefined, something went wrong
 		if (possibleCurNode == undefined) {
@@ -54,7 +56,7 @@ const Astar = async (
 			//if child is not in the closed set
 			if (
 				closedSet.find((node) =>
-                    positionsAreEqual(node.position, child.position)
+					positionsAreEqual(node.position, child.position)
 				) === undefined
 			) {
 				//define the new evaluation values
@@ -74,7 +76,7 @@ const Astar = async (
 				//if the child's position is in the open set, we need to account for if there is a better option in the open set
 				if (
 					openSet.find((node) =>
-                        positionsAreEqual(node.position, child.position)
+						positionsAreEqual(node.position, child.position)
 					) !== undefined
 				) {
 					//if the best g value node with the same pos as the child in the open set has a worse g value
@@ -84,7 +86,7 @@ const Astar = async (
 					) {
 						//remove all the nodes with the same position as the child
 						openSet.filter((node) =>
-                            positionsAreEqual(
+							positionsAreEqual(
 								node.position,
 								child_to_add.position
 							)
@@ -102,7 +104,7 @@ const Astar = async (
 			}
 		});
 	}
-    console.log("Astar: no path found")
+	console.log("Astar: no path found");
 	return null;
 };
 
@@ -143,22 +145,34 @@ function getChildren(parent: Node, arena: Node[]): Node[] {
 	let below: Position = newPosition(parent.position.x, parent.position.y - 1);
 	let left: Position = newPosition(parent.position.x - 1, parent.position.y);
 
-	if (arena.find((node) => positionsAreEqual(node.position, above))?.type !== "obstacle") {
+	if (
+		arena.find((node) => positionsAreEqual(node.position, above))?.type !==
+		"obstacle"
+	) {
 		children.push(
 			newNode(getNewID(), above, "unselected", null, null, null, null)
 		);
 	}
-	if (arena.find((node) => positionsAreEqual(node.position, below))?.type !== "obstacle") {
+	if (
+		arena.find((node) => positionsAreEqual(node.position, below))?.type !==
+		"obstacle"
+	) {
 		children.push(
 			newNode(getNewID(), below, "unselected", null, null, null, null)
 		);
 	}
-	if (arena.find((node) => positionsAreEqual(node.position, left))?.type !== "obstacle") {
+	if (
+		arena.find((node) => positionsAreEqual(node.position, left))?.type !==
+		"obstacle"
+	) {
 		children.push(
 			newNode(getNewID(), left, "unselected", null, null, null, null)
 		);
 	}
-	if (arena.find((node) => positionsAreEqual(node.position, right))?.type !== "obstacle") {
+	if (
+		arena.find((node) => positionsAreEqual(node.position, right))?.type !==
+		"obstacle"
+	) {
 		children.push(
 			newNode(getNewID(), right, "unselected", null, null, null, null)
 		);

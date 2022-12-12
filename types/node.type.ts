@@ -1,6 +1,16 @@
+export let EmptyNode: Node = {
+	x: 0,
+	y: 0,
+	type: "unselected",
+	parent: null,
+	g: 0,
+	h: 0,
+	f: 0,
+}
+
 export type Node = {
-	id: number;
-	position: Position;
+	x: number;
+	y: number;
 	type:
 		| "unselected"
 		| "evaluated"
@@ -9,19 +19,14 @@ export type Node = {
 		| "startpoint"
 		| "endpoint";
 	parent: Node | null;
-	g: number | null;
-	h: number | null;
-	f: number | null;
-};
-
-export type Position = {
-	x: number;
-	y: number;
+	g: number;
+	h: number;
+	f: number;
 };
 
 export function newNode(
-	id: number,
-	position: Position,
+	x: number,
+	y: number,
 	type: "unselected" | "evaluated" | "obstacle" | "path",
 	parent: Node | null,
 	g: number | null,
@@ -29,20 +34,14 @@ export function newNode(
 	f: number | null
 ) {
 	return {
-		id,
-		position,
 		type,
 		parent,
 		g,
 		h,
 		f,
-	};
-}
-
-export function newPosition(x: number, y: number) {
-	return {
 		x,
 		y,
 	};
 }
+
 

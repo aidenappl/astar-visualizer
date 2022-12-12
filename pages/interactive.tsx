@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import Button from "../components/Button";
 import Layout from "../components/Layout";
-import { Node } from "../types/node.type";
+import { Astar } from "../services/astar";
+import { newNode, Node } from "../types/node.type";
 
 const InteractivePage = () => {
 	// Node State
-	const [nodes, setNodes] = useState<any[]>([]);
+	const [nodes, setNodes] = useState<Node[]>([]);
 
 	// Mouse Event Handler
 	const [clickState, setClickState] = useState<string | null>(null);
@@ -28,6 +29,7 @@ const InteractivePage = () => {
 	};
 
 	const setMasterPoint = (node: Node, pointType: string) => {
+		console.log(node);
 		if (pointType == "startpoint" && startPoint == null) {
 			setStartPoint(node);
 			setNodes((prevState) => {
@@ -46,10 +48,6 @@ const InteractivePage = () => {
 	};
 
 	useEffect(() => {
-		console.log(clickState);
-	}, [clickState]);
-
-	useEffect(() => {
 		setNodes(generateNodes(700, 700));
 		document
 			.getElementById("interactivezone")!
@@ -65,7 +63,7 @@ const InteractivePage = () => {
 	const selectedNode = (node: number) => {
 		setNodes((prevState) => {
 			let newState = [...prevState];
-			newState[node].type = "selected";
+			newState[node].type = "obstacle";
 			return newState;
 		});
 	};
@@ -78,12 +76,25 @@ const InteractivePage = () => {
 		});
 	};
 
-	const generateNodes = (width: number, height: number) => {
+	const generateNodes = (width: number, height: number): Node[] => {
 		let genNodes: any[] = [];
 		let id = 0;
 		for (let i = 0; i < width; i += 28) {
 			for (let j = 0; j < height; j += 28) {
-				genNodes.push({ id: id, x: i, y: j, type: "unselected" });
+				genNodes.push(
+					newNode(
+						id,
+						{
+							x: i / 28,
+							y: j / 28,
+						},
+						"unselected",
+						null,
+						0,
+						0,
+						0
+					)
+				);
 				id++;
 			}
 		}
@@ -106,8 +117,14 @@ const InteractivePage = () => {
 						value="Clear"
 					/>
 					<Button
-						onClick={() => {
-							setNodes(generateNodes(700, 700));
+						onClick={async () => {
+							if (startPoint == null || endPoint == null) {
+								window.alert("Please set start and end point");
+								return;
+							}
+							console.log(
+								await Astar(nodes, startPoint!, endPoint!)
+							);
 						}}
 						value="Solve"
 					/>
@@ -155,7 +172,7 @@ const InteractivePage = () => {
 									id={`node_${node.id}`}
 									className={
 										"w-[28px] h-[28px] bg-gray-200 border border-gray-300 hover:bg-gray-800 " +
-										(node.type === "selected"
+										(node.type === "obstacle"
 											? "bg-gray-500" // Selected
 											: node.type === "startpoint"
 											? "bg-green-500" // Start
@@ -174,3 +191,5 @@ const InteractivePage = () => {
 };
 
 export default InteractivePage;
+
+

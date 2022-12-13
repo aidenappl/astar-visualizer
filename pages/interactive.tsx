@@ -114,40 +114,44 @@ const InteractivePage = () => {
 						}}
 						value="Clear"
 					/>
-					<Button
-						onClick={async () => {
-							if (startPoint == null || endPoint == null) {
-								window.alert("Please set start and end point");
-								return;
-							}
-							let path = await Astar(
-								nodes,
-								startPoint!,
-								endPoint!
-							);
-							console.log(path);
-							path?.forEach((node) => {
-								setNodes((prevState) => {
-									let newState = [...prevState];
-									if (
-										newState[node.x][node.y].type !=
-											"endpoint" &&
-										newState[node.x][node.y].type !=
-											"startpoint" &&
-										newState[node.x][node.y].type !=
-											"obstacle"
-									) {
-										newState[node.x][node.y].type =
-											"evaluated";
-									}
-									return newState;
+					{pageState === "unsolved" ? (
+						<Button
+							onClick={async () => {
+								if (startPoint == null || endPoint == null) {
+									window.alert(
+										"Please set start and end point"
+									);
+									return;
+								}
+								let path = await Astar(
+									nodes,
+									startPoint!,
+									endPoint!
+								);
+								console.log(path);
+								path?.forEach((node) => {
+									setNodes((prevState) => {
+										let newState = [...prevState];
+										if (
+											newState[node.x][node.y].type !=
+												"endpoint" &&
+											newState[node.x][node.y].type !=
+												"startpoint" &&
+											newState[node.x][node.y].type !=
+												"obstacle"
+										) {
+											newState[node.x][node.y].type =
+												"evaluated";
+										}
+										return newState;
+									});
 								});
-							});
 
-							setPageState("solved");
-						}}
-						value="Solve"
-					/>
+								setPageState("solved");
+							}}
+							value="Solve"
+						/>
+					) : null}
 				</div>
 			</div>
 			<div className="absolute top-0 flex items-center justify-center w-full h-screen z-1">

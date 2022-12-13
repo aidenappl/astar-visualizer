@@ -91,7 +91,7 @@ const InteractivePage = () => {
 	};
 
 	return (
-		<Layout className="">
+		<Layout className="flex">
 			<div className="relative z-10 flex flex-col items-center py-16">
 				<h1 className="mb-5 text-2xl">Draw Obstacles</h1>
 				<div className="flex gap-4">
@@ -111,9 +111,9 @@ const InteractivePage = () => {
 								window.alert("Please set start and end point");
 								return;
 							}
-							// console.log(
-							// 	await Astar(nodes, startPoint!, endPoint!)
-							// );
+							console.log(
+								await Astar(nodes, startPoint!, endPoint!)
+							);
 						}}
 						value="Solve"
 					/>

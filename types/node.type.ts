@@ -6,7 +6,7 @@ export let EmptyNode: Node = {
 	g: 0,
 	h: 0,
 	f: 0,
-}
+};
 
 export type Node = {
 	x: number;
@@ -27,21 +27,25 @@ export type Node = {
 export function newNode(
 	x: number,
 	y: number,
-	type: "unselected" | "evaluated" | "obstacle" | "path",
+	type:
+		| "unselected"
+		| "evaluated"
+		| "obstacle"
+		| "path"
+		| "startpoint"
+		| "endpoint",
 	parent: Node | null,
-	g: number | null,
-	h: number | null,
-	f: number | null
+	g: number,
+	h: number,
+	f: number
 ) {
 	return {
+		x,
+		y,
 		type,
 		parent,
 		g,
 		h,
 		f,
-		x,
-		y,
 	};
 }
-
-

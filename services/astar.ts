@@ -1,10 +1,15 @@
-import { Node, Position, newNode, newPosition } from "../types/node.type";
+import { Node, newNode } from "../types/node.type";
 
 const Astar = async (
-	arena: Node[],
-	start: Node,
-	end: Node
+	arena: Node[][],
+	startp: Node,
+	endp: Node
 ): Promise<Node[] | null> => {
+
+	var start = newNode(startp.x, startp.y, "startpoint", null, 0, 0, 0);
+	var end = newNode(endp.x, endp.y, "startpoint", null, 0, 0, 0);
+
+
 	console.log("Astar called", arena, start, end);
 
 	//define open set and closed set
@@ -13,24 +18,19 @@ const Astar = async (
 
 	//add the starting node to the open set
 	openSet.push(start);
-	openSet.push(
-		newNode(getNewID(), newPosition(50, 50), "unselected", null, 0, 0, 0)
-	);
 
 	//while open set is not empty
 	while (openSet.length > 0) {
 		console.log("Triggered while loop");
 
+		console.log("OpenSet", openSet);
+
+		//order open set where lowest f values are first
+		openSet = openSet.sort((a, b) => a.f - b.f);
+
 		//get the current node from the open set and remove it
-		let lowestFVal = Math.min(...openSet.map((node) => node.f!));
-
-		let possibleCurNode: Node | undefined = openSet.find(
-			(node) => node.f === lowestFVal
-		);
-
-		openSet = openSet.filter((node) => node.f !== lowestFVal);
-
-		console.log(lowestFVal, possibleCurNode, openSet);
+		var possibleCurNode: Node|undefined = openSet.shift();
+		console.log("PossibleCurNode", possibleCurNode);
 
 		//if the current node is undefined, something went wrong
 		if (possibleCurNode == undefined) {
@@ -44,7 +44,7 @@ const Astar = async (
 		closedSet.push(currentNode);
 
 		//check if the current node is the end
-		if (end.position === currentNode?.position) {
+		if (positionsAreEqual(currentNode, end)) {
 			return getPath(currentNode);
 		}
 
@@ -56,7 +56,7 @@ const Astar = async (
 			//if child is not in the closed set
 			if (
 				closedSet.find((node) =>
-					positionsAreEqual(node.position, child.position)
+					positionsAreEqual(node, child)
 				) === undefined
 			) {
 				//define the new evaluation values
@@ -65,8 +65,8 @@ const Astar = async (
 				var f: number = g + h;
 				//define a new child that is to be added to the open set (potentially)
 				var child_to_add: Node = newNode(
-					getNewID(),
-					child.position,
+					child.x,
+					child.y,
 					"evaluated",
 					currentNode,
 					g,
@@ -76,7 +76,7 @@ const Astar = async (
 				//if the child's position is in the open set, we need to account for if there is a better option in the open set
 				if (
 					openSet.find((node) =>
-						positionsAreEqual(node.position, child.position)
+						positionsAreEqual(node, child)
 					) !== undefined
 				) {
 					//if the best g value node with the same pos as the child in the open set has a worse g value
@@ -87,8 +87,8 @@ const Astar = async (
 						//remove all the nodes with the same position as the child
 						openSet.filter((node) =>
 							positionsAreEqual(
-								node.position,
-								child_to_add.position
+								node,
+								child_to_add
 							)
 						);
 						//add the new child to the list
@@ -115,7 +115,7 @@ function getNewID(): number {
 function getBestGNodeWithPos(test: Node, nodes: Node[]): Node {
 	let res: Node = test;
 	nodes.forEach((node) => {
-		if (positionsAreEqual(node.position, test.position)) {
+		if (positionsAreEqual(node, test)) {
 			if (res.g !== null && node.g !== null) {
 				if (res.g > node.g) res = node;
 			}
@@ -124,63 +124,72 @@ function getBestGNodeWithPos(test: Node, nodes: Node[]): Node {
 	return res;
 }
 
-function positionsAreEqual(pos1: Position, pos2: Position) {
+function positionsAreEqual(pos1: Node, pos2: Node) {
 	return pos1.x === pos2.x && pos1.y === pos2.y;
 }
 
 function Distance(node: Node, end: Node): number {
 	return (
-		Math.pow(end.position.x - node.position.x, 2) +
-		Math.pow(end.position.y - node.position.y, 2)
+		Math.pow(end.x - node.x, 2) +
+		Math.pow(end.y - node.y, 2)
 	);
 }
 
-function getChildren(parent: Node, arena: Node[]): Node[] {
+function findNodeInArray(array: Node[][], toSearch: Node) {
+
+	for (let i = 0; i < array.length; i++) {
+		let innerArray = array[i];
+		for (let j = 0; j < innerArray.length; j++) {
+			let element = innerArray[j];
+			if (positionsAreEqual(element, toSearch)) {
+				return element;
+			}
+		}
+	}
+}
+
+function getChildren(parent: Node, arena: Node[][]): Node[] {
 	console.log("getChildren called");
 
 	let children: Node[] = [];
 
-	let above: Position = newPosition(parent.position.x, parent.position.y + 1);
-	let right: Position = newPosition(parent.position.x + 1, parent.position.y);
-	let below: Position = newPosition(parent.position.x, parent.position.y - 1);
-	let left: Position = newPosition(parent.position.x - 1, parent.position.y);
+	let above: Node = getNodeRelative(parent, 0, 1);
+	let below: Node = getNodeRelative(parent, 0, -1);
+	let left: Node = getNodeRelative(parent, -1, 0);
+	let right: Node = getNodeRelative(parent, 1, 0);
 
 	if (
-		arena.find((node) => positionsAreEqual(node.position, above))?.type !==
-		"obstacle"
+		findNodeInArray(arena, above)?.type ===
+		"unselected"
 	) {
-		children.push(
-			newNode(getNewID(), above, "unselected", null, null, null, null)
-		);
+		children.push(above);
 	}
 	if (
-		arena.find((node) => positionsAreEqual(node.position, below))?.type !==
-		"obstacle"
+		findNodeInArray(arena, above)?.type ===
+		"unselected"
 	) {
-		children.push(
-			newNode(getNewID(), below, "unselected", null, null, null, null)
-		);
+		children.push(below);
 	}
 	if (
-		arena.find((node) => positionsAreEqual(node.position, left))?.type !==
-		"obstacle"
+		findNodeInArray(arena, left)?.type ===
+		"unselected"
 	) {
-		children.push(
-			newNode(getNewID(), left, "unselected", null, null, null, null)
-		);
+		children.push(left);
 	}
 	if (
-		arena.find((node) => positionsAreEqual(node.position, right))?.type !==
-		"obstacle"
+		findNodeInArray(arena, right)?.type ===
+		"unselected"
 	) {
-		children.push(
-			newNode(getNewID(), right, "unselected", null, null, null, null)
-		);
+		children.push(right);
 	}
 
 	console.log("children: ", children);
 
 	return children;
+}
+
+function getNodeRelative(node: Node, x: number, y: number): Node {
+	return newNode(node.x+x, node.y+y, node.type, node.parent, node.g, node.h, node.f);
 }
 
 function getPath(end: Node): Node[] {

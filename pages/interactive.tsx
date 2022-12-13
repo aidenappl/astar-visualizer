@@ -16,6 +16,15 @@ const InteractivePage = () => {
 	const [startPoint, setStartPoint] = useState<Node | null>(null);
 	const [endPoint, setEndPoint] = useState<Node | null>(null);
 
+	// Page State
+	const [pageState, setPageState] = useState<"unsolved" | "solved">(
+		"unsolved"
+	);
+
+	useEffect(() => {
+		console.log(startPoint, endPoint);
+	}, [startPoint, endPoint]);
+
 	const handleMouseMove = (event: any) => {
 		let node = event.target.id;
 		if (event.buttons == 1) {
@@ -30,7 +39,6 @@ const InteractivePage = () => {
 	};
 
 	const setMasterPoint = (node: Node, pointType: string) => {
-		console.log(node);
 		if (pointType == "startpoint" && startPoint == null) {
 			setStartPoint(node);
 			setNodes((prevState) => {
@@ -49,7 +57,7 @@ const InteractivePage = () => {
 	};
 
 	useEffect(() => {
-		setNodes(generateNodes(25, 25, EmptyNode));
+		setNodes(generateNodes(30, 30, EmptyNode));
 	}, []);
 
 	useEffect(() => {
@@ -91,8 +99,8 @@ const InteractivePage = () => {
 	};
 
 	return (
-		<Layout className="flex">
-			<div className="relative z-10 flex flex-col items-center py-16">
+		<Layout className="flex justify-center">
+			<div className="relative z-10 flex flex-col items-center py-16 h-fit">
 				<h1 className="mb-5 text-2xl">Draw Obstacles</h1>
 				<div className="flex gap-4">
 					<Button
@@ -101,7 +109,8 @@ const InteractivePage = () => {
 							setClickState(null);
 							setStartPoint(null);
 							setEndPoint(null);
-							setNodes(generateNodes(25, 25, EmptyNode));
+							setNodes(generateNodes(30, 30, EmptyNode));
+							setPageState("unsolved");
 						}}
 						value="Clear"
 					/>
@@ -111,9 +120,31 @@ const InteractivePage = () => {
 								window.alert("Please set start and end point");
 								return;
 							}
-							console.log(
-								await Astar(nodes, startPoint!, endPoint!)
+							let path = await Astar(
+								nodes,
+								startPoint!,
+								endPoint!
 							);
+							console.log(path);
+							path?.forEach((node) => {
+								setNodes((prevState) => {
+									let newState = [...prevState];
+									if (
+										newState[node.x][node.y].type !=
+											"endpoint" &&
+										newState[node.x][node.y].type !=
+											"startpoint" &&
+										newState[node.x][node.y].type !=
+											"obstacle"
+									) {
+										newState[node.x][node.y].type =
+											"evaluated";
+									}
+									return newState;
+								});
+							});
+
+							setPageState("solved");
 						}}
 						value="Solve"
 					/>
@@ -141,15 +172,25 @@ const InteractivePage = () => {
 							className="w-[28px] h-[28px] bg-gray-300 border border-gray-400 hover:bg-gray-800"
 						/>
 					</div>
-					<div
-						id="interactivezone"
-						className="flex flex-wrap w-[700px] "
-					>
+					<div id="interactivezone">
 						{nodes
 							? nodes.map((row, rowIndex) => {
+									if (
+										rowIndex < 3 ||
+										rowIndex > nodes.length - 3
+									)
+										return;
 									return (
-										<div key={rowIndex}>
+										<div
+											key={rowIndex}
+											className="relative flex"
+										>
 											{row.map((node, i) => {
+												if (
+													i < 3 ||
+													i > nodes.length - 3
+												)
+													return;
 												return (
 													<div
 														key={i}
@@ -178,7 +219,7 @@ const InteractivePage = () => {
 														}}
 														id={`${node.x}x${node.y}`}
 														className={
-															"w-[28px] h-[28px] bg-gray-200 border border-gray-300 hover:bg-gray-800 " +
+															"w-[28px] h-[28px] bg-gray-200 border border-gray-300 hover:bg-gray-800 flex items-center justify-center " +
 															(node.type ===
 															"obstacle"
 																? "bg-gray-500" // Selected
@@ -187,10 +228,22 @@ const InteractivePage = () => {
 																? "bg-green-500" // Start
 																: node.type ===
 																  "endpoint"
-																? "bg-red-500" // End
+																? "bg-red-500"
+																: node.type ===
+																  "evaluated"
+																? "bg-blue-500" // End
 																: "")
 														}
-													/>
+													>
+														{node.type ===
+															"endpoint" &&
+														pageState ===
+															"solved" ? (
+															<p className="text-red-200 select-none">
+																→
+															</p>
+														) : null}
+													</div>
 												);
 											})}
 										</div>
